@@ -59,8 +59,8 @@ const ManageFlights = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h1 className="text-3xl font-semibold mb-4 sm:mb-0">🛬 Manage Flights</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 text-gray-800">
+        <h1 className="text-3xl font-semibold mb-4 sm:mb-0"> Manage Flights</h1>
 
         <button
           onClick={() => navigate("/admin/add-flight")}
@@ -80,11 +80,11 @@ const ManageFlights = () => {
           />
 
           {/* Pagination */}
-          <div className="flex justify-center items-center gap-4 mt-6">
+          <div className="flex justify-center items-center gap-4 mt-6 text-gray-700">
             <button
               onClick={handlePrev}
               disabled={page === 1}
-              className="bg-gray-200 px-3 py-1 rounded-md disabled:opacity-50"
+              className="bg-gray-200 px-3 py-1 rounded-md "
             >
               Prev
             </button>

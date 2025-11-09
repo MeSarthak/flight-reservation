@@ -11,17 +11,11 @@ const FlightTable = ({ flights, onDelete }) => {
     navigate(`/admin/edit-flight/${flightId}`);
   };
 
-  if (!flights.length)
-    return (
-      <div>
-        <AdminNavbar />
-        <p className="text-center text-gray-500 mt-8">No flights available.</p>
-      </div>
-    );
-
   return (
     <div>
-      <AdminNavbar />
+      {flights.length === 0 && (
+        <p className="text-center text-gray-500 mt-8">No flights available.</p>
+      )}
 
       <div className="overflow-x-auto bg-white shadow-md rounded-2xl mt-6">
         <table className="min-w-full text-sm text-left border-collapse">
