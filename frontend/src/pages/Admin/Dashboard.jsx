@@ -39,7 +39,7 @@ const Dashboard = () => {
         <AdminNavbar />
         <div className="min-h-screen bg-gray-50 p-6">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-            <h1 className="text-3xl font-semibold">🛫 Admin Dashboard</h1>
+            <h1 className="text-3xl font-semibold text-gray-800">🛫 Admin Dashboard</h1>
 
             <div className="flex items-center gap-3 mt-4 sm:mt-0">
             <select

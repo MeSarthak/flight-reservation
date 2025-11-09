@@ -76,7 +76,6 @@ const ManageFlights = () => {
         <>
           <FlightTable
             flights={flights}
-            onEdit={handleEdit}
             onDelete={handleDelete}
           />
 
