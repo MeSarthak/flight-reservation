@@ -27,3 +27,15 @@ exports.cancel = async (req, res) => {
 		res.status(500).json({ status: false, message: err.message || 'Failed to cancel' });
 	}
 };
+
+// GET /bookings - list bookings for current user
+exports.list = async (req, res) => {
+	const user = req.user;
+	try {
+		const bookings = await bookingService.getBookingsByUser(user.user_id);
+		res.json({ status: true, bookings });
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ status: false, message: 'Failed to fetch bookings' });
+	}
+};
