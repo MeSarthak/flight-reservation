@@ -44,7 +44,7 @@ exports.createBooking = async (user_id, flight_id, passengers) => {
   }
 };
 
-// Fetch bookings for a user along with passenger rows
+// Fetch bookings for a user along with passenger rows and payment amount
 exports.getBookingsByUser = async (user_id) => {
   const [bookings] = await pool.execute(
     'SELECT * FROM bookings WHERE user_id = ? ORDER BY booking_time DESC',
@@ -63,6 +63,19 @@ exports.getBookingsByUser = async (user_id) => {
       WHERE bp.booking_id IN (${placeholders})`,
     ids
   );
+
+  // Fetch payment amounts for each booking - using LEFT JOIN with GROUP BY to sum all payments
+  const [paymentRows] = await pool.execute(
+    `SELECT booking_id, SUM(amount) as total_amount FROM payments WHERE booking_id IN (${placeholders}) GROUP BY booking_id`,
+    ids
+  );
+
+  console.log('Payment rows fetched:', paymentRows);
+
+  const paymentsByBooking = {};
+  for (const p of paymentRows) {
+    paymentsByBooking[p.booking_id] = p.total_amount;
+  }
 
   const byBooking = {};
   for (const p of passRows) {
@@ -83,6 +96,7 @@ exports.getBookingsByUser = async (user_id) => {
     flight_id: b.flight_id,
     booking_time: b.booking_time,
     status: b.status,
+    amount: paymentsByBooking[b.booking_id] || null,
     passengers: byBooking[b.booking_id] || [],
   }));
 };

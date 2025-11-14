@@ -35,5 +35,24 @@ exports.login = async (req, res) => {
 	if (!ok) return res.status(401).json({ status: false, message: 'Invalid credentials' });
 
 	const token = jwt.sign({ user_id: user.user_id, role: user.role, email: user.email }, SECRET, { expiresIn: '8h' });
-	res.json({ status: true, token, user: { user_id: user.user_id, name: user.name, email: user.email, role: user.role } });
+	res.json({ status: true, token, user: { user_id: user.user_id, name: user.name, email: user.email, phone: user.phone, role: user.role } });
+};
+
+exports.updateProfile = async (req, res) => {
+	const { name, email, phone } = req.body;
+	const user_id = req.user && req.user.user_id;
+	if (!user_id) return res.status(401).json({ status: false, message: 'Unauthorized' });
+
+	// basic validation
+	if (!name && !email && !phone) return res.status(400).json({ status: false, message: 'No fields to update' });
+
+	try {
+		const updated = await authService.updateUser(user_id, { name, email, phone });
+		// Return updated user (re-fetch)
+		const user = await authService.getUserById(user_id);
+		return res.json({ status: true, user: { user_id: user.user_id, name: user.name, email: user.email, role: user.role, phone: user.phone } });
+	} catch (err) {
+		console.error('Error updating profile', err);
+		return res.status(500).json({ status: false, message: 'Failed to update profile' });
+	}
 };

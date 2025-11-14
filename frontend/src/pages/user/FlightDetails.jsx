@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 
 const FlightDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromBookings = location.state?.fromBookings || false;
   const [flight, setFlight] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -155,14 +157,16 @@ const FlightDetails = () => {
         </div>
 
         {/* Book Button */}
-        <div className="flex justify-center mt-6">
-          <button
-            onClick={handleBook}
-            className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md"
-          >
-            🛒 Book Flight
-          </button>
-        </div>
+        {!fromBookings && (
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={handleBook}
+              className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md"
+            >
+              🛒 Book Flight
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

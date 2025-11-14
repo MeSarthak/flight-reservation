@@ -70,6 +70,7 @@ const MyBookings = () => {
               <div className="mb-1"><strong>Reference:</strong> {b.booking_reference || b.reference}</div>
               <div className="mb-1"><strong>Flight:</strong> {b.flight_id || b.flight?.flight_id || b.flight_number}</div>
               <div className="mb-1"><strong>Status:</strong> {b.status || 'confirmed'}</div>
+              <div className="mb-1"><strong>Amount Paid:</strong> ₹{b.amount ? Number(b.amount).toFixed(2) : 'N/A'}</div>
               <div className="mb-2"><strong>Passengers:</strong> {Array.isArray(b.passengers) ? b.passengers.length : (b.passenger_count || 0)}</div>
               {Array.isArray(b.passengers) && b.passengers.length > 0 && (
                 <div className="mb-2 pl-3">
@@ -84,7 +85,7 @@ const MyBookings = () => {
                 </div>
               )}
               <div className="mt-2">
-                <button className="mr-2 bg-yellow-500 text-white px-3 py-1 rounded" onClick={() => navigate(`/flights/${b.flight_id || b.flight?.flight_id}`)}>View flight</button>
+                <button className="mr-2 bg-yellow-500 text-white px-3 py-1 rounded" onClick={() => navigate(`/flights/${b.flight_id || b.flight?.flight_id}`, { state: { fromBookings: true } })}>View flight</button>
                 {(b.status || '').toString().toLowerCase() !== 'cancelled' && (
                   <button className="bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleCancel(b.booking_id || b.id)}>Cancel</button>
                 )}

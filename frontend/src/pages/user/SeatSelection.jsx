@@ -122,10 +122,10 @@ const SeatSelection = () => {
           </div>
         </div>
 
-        <div className="overflow-auto">
+        <div className="overflow-auto flex justify-center">
           <div className="grid gap-2">
             {sortedRows.map((r) => (
-              <div key={r} className="flex items-center gap-2">
+              <div key={r} className="flex items-center gap-2 justify-center">
                 <div className="w-8 text-sm font-medium">{r}</div>
                 <div className="flex gap-2">
                   {sortedCols.map((c) => {

@@ -1,28 +1,25 @@
-// src/pages/auth/Login.jsx
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login,setAuthToken,setUser } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    console.log("Attempting login with email:", email);
     try {
       const data = await login(email, password);
-      console.log("Login response data:", data);
       if (data.status) {
-        alert("Login successful!");
-        navigate("/"); // Redirect to home or dashboard based on role later
+        navigate("/");
       } else {
         setError(data.message || "Invalid credentials");
       }
@@ -34,7 +31,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center w-full h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center px-4 relative overflow-hidden">
       <div className="bg-white p-8 rounded-2xl shadow-md w-96">
         <h2 className="text-2xl font-semibold text-center mb-6">Login</h2>
 

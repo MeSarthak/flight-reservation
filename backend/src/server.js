@@ -1,5 +1,5 @@
 // Load .env Enviroment Variables to process.env
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
 // Patches
 const {inject, errorHandler} = require('express-custom-error');
