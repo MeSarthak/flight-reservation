@@ -8,6 +8,7 @@ const FlightDetails = () => {
   const [flight, setFlight] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [seatsInfo, setSeatsInfo] = useState({ total: 0, available: 0, booked: 0 });
 
   // ✈️ Fetch Flight by ID
   useEffect(() => {
@@ -36,6 +37,17 @@ const FlightDetails = () => {
         }
 
         setFlight(flightData);
+        // fetch seats info for availability counts
+        try {
+          const seatRes = await axiosInstance.get(`/seats/flight/${id}`);
+          const seatList = seatRes.data.seats || seatRes.data || [];
+          const booked = seatList.filter((s) => s.available === false).length;
+          const available = seatList.filter((s) => s.available === true).length;
+          setSeatsInfo({ total: seatList.length || (flightData.total_seats || 0), available, booked });
+        } catch (e) {
+          // fallback to total seats only
+          setSeatsInfo({ total: flightData.total_seats || 0, available: 0, booked: 0 });
+        }
       } catch (err) {
         console.error(err);
         setError(err.response?.data?.message || "Failed to load flight details");
@@ -47,7 +59,8 @@ const FlightDetails = () => {
   }, [id]);
 
   const handleBook = () => {
-    navigate("/payment", { state: { flight } });
+    // Navigate to seat selection first
+    navigate(`/flights/${id}/seats`, { state: { flight } });
   };
 
   const formatDate = (dateStr) => {
@@ -99,7 +112,13 @@ const FlightDetails = () => {
               {flight.base_fare ? Number(flight.base_fare).toFixed(2) : "N/A"}
             </p>
             <p>
-              <strong>Total Seats:</strong> {flight.total_seats || "N/A"}
+              <strong>Total Seats:</strong> {seatsInfo.total || flight.total_seats || "N/A"}
+            </p>
+            <p>
+              <strong>Available:</strong> {seatsInfo.available}
+            </p>
+            <p>
+              <strong>Booked:</strong> {seatsInfo.booked}
             </p>
           </div>
         </div>

@@ -1,4 +1,5 @@
-
+// Load .env Enviroment Variables to process.env
+require('dotenv').config();
 
 // Patches
 const {inject, errorHandler} = require('express-custom-error');
@@ -13,8 +14,6 @@ const helmet = require('helmet');
 
 
 const logger = require('./util/logger');
-
-// Load .env Enviroment Variables to process.env
 
 require('mandatoryenv').load([
     'DB_HOST',

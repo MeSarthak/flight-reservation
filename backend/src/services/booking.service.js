@@ -57,7 +57,10 @@ exports.getBookingsByUser = async (user_id) => {
   const placeholders = ids.map(() => '?').join(',');
 
   const [passRows] = await pool.execute(
-    `SELECT bp.*, b.flight_id, b.booking_reference FROM booking_passengers bp JOIN bookings b ON bp.booking_id = b.booking_id WHERE bp.booking_id IN (${placeholders})`,
+    `SELECT bp.*, b.flight_id, b.booking_reference, s.seat_number FROM booking_passengers bp
+      JOIN bookings b ON bp.booking_id = b.booking_id
+      LEFT JOIN seats s ON bp.seat_id = s.seat_id
+      WHERE bp.booking_id IN (${placeholders})`,
     ids
   );
 
@@ -70,6 +73,7 @@ exports.getBookingsByUser = async (user_id) => {
       age: p.age,
       gender: p.gender,
       seat_id: p.seat_id,
+      seat_number: p.seat_number || null,
     });
   }
 

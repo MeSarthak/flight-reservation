@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { LogOut, User } from "lucide-react";
 
 const AvailableFlights = () => {
   const [flights, setFlights] = useState([]);
@@ -8,6 +9,7 @@ const AvailableFlights = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const navigate = useNavigate();
 
   // 🔍 Filter states
@@ -101,6 +103,14 @@ const AvailableFlights = () => {
     setFilteredFlights(filtered);
   };
 
+  // 🚪 Handle Logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setShowProfileMenu(false);
+    navigate("/login");
+  };
+
   const formatDate = (dateStr) =>
     new Date(dateStr).toLocaleString("en-GB", {
       day: "numeric",
@@ -123,14 +133,55 @@ const AvailableFlights = () => {
     <div className="p-8 min-h-screen bg-gray-50">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">✈️ Available Flights</h1>
-        {user?.role === "admin" && (
+        <div className="flex gap-3 items-center">
           <button
-            onClick={() => navigate("/admin/dashboard")}
-            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
+            onClick={() => navigate("/my-bookings")}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition font-semibold"
           >
-            Go to Admin Panel
+            📋 My Bookings
           </button>
-        )}
+          {user?.role === "admin" && (
+            <button
+              onClick={() => navigate("/admin/dashboard")}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+            >
+              Go to Admin Panel
+            </button>
+          )}
+          
+          {/* 👤 Profile Avatar with Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-full hover:bg-indigo-700 transition font-semibold"
+            >
+              <User className="w-5 h-5" />
+              <span className="hidden sm:inline">{user?.name?.split(" ")[0]}</span>
+            </button>
+            
+            {/* Dropdown Menu */}
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                <div className="px-4 py-3 border-b border-gray-200">
+                  <p className="text-sm font-semibold text-gray-800">{user?.name}</p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
+                </div>
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition flex items-center gap-2"
+                >
+                  <User className="w-4 h-4" /> View Profile
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition flex items-center gap-2 border-t border-gray-200"
+                >
+                  <LogOut className="w-4 h-4" /> Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* 🔍 Filter Bar */}

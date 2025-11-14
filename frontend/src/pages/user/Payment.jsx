@@ -1,17 +1,28 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
-import { UserPlus, CreditCard, Trash2, IndianRupee, Loader2, PlaneTakeoff } from "lucide-react";
+import { CreditCard, IndianRupee, Loader2, PlaneTakeoff, CheckCircle } from "lucide-react";
 
 const Payment = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const flight = state?.flight;
+  const incomingSelectedSeats = state?.selectedSeats || [];
 
-  const [passengers, setPassengers] = useState([{ name: "", age: "", gender: "" }]);
+  // Initialize passengers according to selected seats (if provided)
+  const initialPassengers = () => {
+    if (incomingSelectedSeats && incomingSelectedSeats.length > 0) {
+      return incomingSelectedSeats.map((s) => ({ name: "", age: "", gender: "", seat_id: s.seat_id, seat_number: s.seat_number }));
+    }
+    return [{ name: "", age: "", gender: "" }];
+  };
+
+  const [passengers, setPassengers] = useState(initialPassengers);
   const [method, setMethod] = useState("card");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState(null);
 
   const amount = (flight?.price || flight?.base_fare || 0) * passengers.length;
 
@@ -19,8 +30,7 @@ const Payment = () => {
     setPassengers((p) => p.map((pp, i) => (i === idx ? { ...pp, [key]: value } : pp)));
   };
 
-  const addPassenger = () => setPassengers((p) => [...p, { name: "", age: "", gender: "" }]);
-  const removePassenger = (idx) => setPassengers((p) => p.filter((_, i) => i !== idx));
+  // Passenger count is derived from selected seats (no add/remove controls here)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,10 +40,10 @@ const Payment = () => {
     setError(null);
     setLoading(true);
     try {
-      // ✈️ Create booking
+      // ✈️ Create booking (ensure seat_id is included if available)
       const payload = {
         flight_id: flight.flight_id || flight.id,
-        passengers,
+        passengers: passengers.map((p) => ({ name: p.name, age: p.age, gender: p.gender, seat_id: p.seat_id || null })),
       };
       const bookingRes = await axiosInstance.post(`/bookings`, payload);
       const booking = bookingRes.data.booking || bookingRes.data;
@@ -47,8 +57,16 @@ const Payment = () => {
       };
       await axiosInstance.post(`/payments`, paymentPayload);
 
-      // ✅ Redirect
-      navigate("/my-bookings");
+      // ✅ Show confirmation popup instead of redirecting
+      setBookingDetails({
+        bookingId: bookingId,
+        amount: amount,
+        passengerCount: passengers.length,
+        flightNumber: flight.flight_number,
+        from: flight.departure_code,
+        to: flight.arrival_code
+      });
+      setShowConfirmation(true);
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Payment or booking failed");
@@ -56,6 +74,70 @@ const Payment = () => {
       setLoading(false);
     }
   };
+
+  // Confirmation Modal Component
+  const ConfirmationModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center animate-fade-in">
+        {/* Success Icon */}
+        <div className="mb-4 flex justify-center">
+          <div className="bg-green-100 rounded-full p-4">
+            <CheckCircle className="w-16 h-16 text-green-600" />
+          </div>
+        </div>
+
+        {/* Success Message */}
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Booking Confirmed!</h2>
+        <p className="text-gray-600 mb-6">Your payment was successful and booking is confirmed.</p>
+
+        {/* Booking Details */}
+        {bookingDetails && (
+          <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left space-y-2">
+            <div className="flex justify-between text-gray-700">
+              <span className="font-semibold">Booking ID:</span>
+              <span>#{bookingDetails.bookingId}</span>
+            </div>
+            <div className="flex justify-between text-gray-700">
+              <span className="font-semibold">Flight:</span>
+              <span>{bookingDetails.flightNumber}</span>
+            </div>
+            <div className="flex justify-between text-gray-700">
+              <span className="font-semibold">Route:</span>
+              <span>{bookingDetails.from} → {bookingDetails.to}</span>
+            </div>
+            <div className="flex justify-between text-gray-700">
+              <span className="font-semibold">Passengers:</span>
+              <span>{bookingDetails.passengerCount}</span>
+            </div>
+            <div className="flex justify-between text-gray-700 border-t pt-2">
+              <span className="font-semibold">Total Amount:</span>
+              <span className="text-green-600 font-bold">₹{bookingDetails.amount.toFixed(2)}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Buttons */}
+        <div className="space-y-3">
+          <button
+            onClick={() => navigate("/")}
+            className="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 font-semibold transition-all duration-200"
+          >
+            Back to Home
+          </button>
+          <button
+            onClick={() => navigate("/my-bookings")}
+            className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            View My Bookings
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (showConfirmation) {
+    return <ConfirmationModal />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-10 px-6 flex justify-center">
@@ -112,24 +194,8 @@ const Payment = () => {
                       <option value="Female">Female</option>
                       <option value="Other">Other</option>
                     </select>
-                    {i > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => removePassenger(i)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md transition-all duration-200 flex items-center gap-1"
-                      >
-                        <Trash2 className="w-4 h-4" /> Remove
-                      </button>
-                    )}
                   </div>
                 ))}
-                <button
-                  type="button"
-                  className="mt-2 flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-md font-medium hover:bg-indigo-200 transition-all duration-200"
-                  onClick={addPassenger}
-                >
-                  <UserPlus className="w-4 h-4" /> Add Passenger
-                </button>
               </div>
             </div>
 

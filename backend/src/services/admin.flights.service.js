@@ -15,6 +15,43 @@ exports.createFlight = async (data) => {
   const [result] = await pool.execute(sql, params);
   const id = result.insertId;
   const [rows] = await pool.execute('SELECT * FROM flights WHERE flight_id = ?', [id]);
+  // After creating a flight, ensure the aircraft has seats defined. If not, auto-generate seats.
+  try {
+    const aircraftId = rows[0].aircraft_id;
+    const [srows] = await pool.execute('SELECT COUNT(*) AS cnt FROM seats WHERE aircraft_id = ?', [aircraftId]);
+    const count = srows[0]?.cnt || 0;
+    if (count === 0) {
+      // fetch aircraft capacity
+      const [arows] = await pool.execute('SELECT total_seats FROM aircrafts WHERE aircraft_id = ?', [aircraftId]);
+      const totalSeats = arows[0]?.total_seats || 0;
+      if (totalSeats > 0) {
+        const cols = ['A','B','C','D'];
+        const rowsCount = Math.ceil(totalSeats / cols.length);
+        const values = [];
+        let counter = 0;
+        for (let r = 1; r <= rowsCount; r++) {
+          for (const c of cols) {
+            counter++;
+            if (counter > totalSeats) break;
+            values.push([aircraftId, `${r}${c}`, 'economy']);
+          }
+          if (counter > totalSeats) break;
+        }
+        if (values.length > 0) {
+          const placeholders = values.map(() => '(?, ?, ?)').join(',');
+          const flat = values.flat();
+          try {
+            await pool.execute(`INSERT INTO seats (aircraft_id, seat_number, seat_class) VALUES ${placeholders}`, flat);
+          } catch (e) {
+            // ignore insert errors (could be race with another request)
+            console.error('Auto-seed seats failed', e.message || e);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Post-create seat seeding failed', e.message || e);
+  }
   return rows[0];
 };
 

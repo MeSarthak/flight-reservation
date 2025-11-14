@@ -8,6 +8,7 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Home from "../pages/user/Home";
 import FlightDetails from "../pages/user/FlightDetails";
+import SeatSelection from "../pages/user/SeatSelection";
 import MyBookings from "../pages/user/MyBookings";
 import PaymentPage from "../pages/user/PaymentPage";
 import Dashboard from "../pages/Admin/Dashboard";
@@ -17,6 +18,7 @@ import ManageAirports from "../pages/admin/ManageAirports";
 import AddFlight from "../pages/admin/AddFlight";
 import Analytics from "../pages/admin/Analytics";
 import Payment from "../pages/user/Payment";
+import Profile from "../pages/user/Profile";
 
 const AppRouter = () => (
     <AuthProvider>
@@ -27,6 +29,7 @@ const AppRouter = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/flights/:id" element={<FlightDetails />} />
+                <Route path="/flights/:id/seats" element={<SeatSelection />} />
 
                 {/* User protected routes */}
                 <Route
@@ -34,6 +37,14 @@ const AppRouter = () => (
                     element={
                         <ProtectedRoute>
                             <MyBookings />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <Profile />
                         </ProtectedRoute>
                     }
                 />

@@ -40,7 +40,14 @@ const MyBookings = () => {
     if (!confirm("Cancel this booking?")) return;
     try {
       await axiosInstance.post(`/bookings/${bookingId}/cancel`);
-      setBookings((b) => b.filter((x) => x.booking_id !== bookingId && x.id !== bookingId));
+      // update booking status locally to reflect cancellation
+      setBookings((prev) =>
+        prev.map((bk) => {
+          const id = bk.booking_id || bk.id;
+          if (id === bookingId) return { ...bk, status: 'cancelled' };
+          return bk;
+        })
+      );
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Failed to cancel booking");
@@ -63,9 +70,24 @@ const MyBookings = () => {
               <div className="mb-1"><strong>Reference:</strong> {b.booking_reference || b.reference}</div>
               <div className="mb-1"><strong>Flight:</strong> {b.flight_id || b.flight?.flight_id || b.flight_number}</div>
               <div className="mb-1"><strong>Status:</strong> {b.status || 'confirmed'}</div>
+              <div className="mb-2"><strong>Passengers:</strong> {Array.isArray(b.passengers) ? b.passengers.length : (b.passenger_count || 0)}</div>
+              {Array.isArray(b.passengers) && b.passengers.length > 0 && (
+                <div className="mb-2 pl-3">
+                  {b.passengers.map((p) => (
+                    <div key={p.passenger_id} className="flex flex-col sm:flex-row sm:items-center sm:gap-4 mb-1">
+                      <div><strong>Name:</strong> {p.name}</div>
+                      <div><strong>Age:</strong> {p.age || 'N/A'}</div>
+                      <div><strong>Gender:</strong> {p.gender || 'N/A'}</div>
+                      <div><strong>Seat:</strong> {p.seat_number || (p.seat_id ? `#${p.seat_id}` : 'Not assigned')}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="mt-2">
                 <button className="mr-2 bg-yellow-500 text-white px-3 py-1 rounded" onClick={() => navigate(`/flights/${b.flight_id || b.flight?.flight_id}`)}>View flight</button>
-                <button className="bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleCancel(b.booking_id || b.id)}>Cancel</button>
+                {(b.status || '').toString().toLowerCase() !== 'cancelled' && (
+                  <button className="bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleCancel(b.booking_id || b.id)}>Cancel</button>
+                )}
               </div>
             </div>
           ))}
