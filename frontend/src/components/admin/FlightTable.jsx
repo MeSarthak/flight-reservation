@@ -6,10 +6,6 @@ import AdminNavbar from "./AdminNavbar";
 const FlightTable = ({ flights, onDelete }) => {
   const navigate = useNavigate();
 
-  // Navigate to edit page
-  const handleEdit = (flightId) => {
-    navigate(`/admin/edit-flight/${flightId}`);
-  };
 
   return (
     <div>
@@ -85,13 +81,6 @@ const FlightTable = ({ flights, onDelete }) => {
                   </span>
                 </td>
                 <td className="p-4 text-center space-x-2">
-                  <button
-                    onClick={() => handleEdit(flight.flight_id)}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg flex items-center gap-2 mx-auto"
-                  >
-                    <i className="fas fa-edit"></i>
-                    Edit
-                  </button>
                   <button
                     onClick={() => onDelete(flight.flight_id)}
                     className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg flex items-center gap-2 mx-auto mt-2"
