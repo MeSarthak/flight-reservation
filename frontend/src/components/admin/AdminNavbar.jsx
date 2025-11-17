@@ -21,25 +21,30 @@ const AdminNavbar = () => {
   ];
 
   return (
-    <nav className="bg-blue-700 text-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
+    <nav className="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-700 text-white shadow-xl sticky top-0 z-50 border-b border-blue-600">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
         {/* Logo */}
-        <h1
-          className="text-xl font-bold cursor-pointer"
+        <div
+          className="flex items-center gap-3 cursor-pointer group"
           onClick={() => navigate("/admin/dashboard")}
         >
-          ✈️ Flight Admin
-        </h1>
+          <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:bg-white/30 transition-all">
+            <i className="fas fa-plane text-xl"></i>
+          </div>
+          <h1 className="text-xl font-bold">Flight Admin</h1>
+        </div>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-4">
           {navLinks.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `hover:text-gray-200 transition ${
-                  isActive ? "font-semibold underline" : ""
+                `px-4 py-2 rounded-xl transition-all duration-200 flex items-center gap-2 ${
+                  isActive
+                    ? "bg-white/20 backdrop-blur-sm font-semibold shadow-lg"
+                    : "hover:bg-white/10"
                 }`
               }
             >
@@ -47,14 +52,18 @@ const AdminNavbar = () => {
             </NavLink>
           ))}
 
-          <span className="text-sm text-gray-300 ml-4">
-            {user?.name ? `Hello, ${user.name}` : "Admin"}
-          </span>
+          <div className="ml-4 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+            <span className="text-sm font-medium">
+              <i className="fas fa-user-circle mr-2"></i>
+              {user?.name ? user.name.split(' ')[0] : "Admin"}
+            </span>
+          </div>
 
           <button
             onClick={handleLogout}
-            className="ml-4 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
+            className="ml-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center gap-2"
           >
+            <i className="fas fa-sign-out-alt"></i>
             Logout
           </button>
         </div>
@@ -86,15 +95,15 @@ const AdminNavbar = () => {
 
       {/* Mobile Dropdown */}
       {isOpen && (
-        <div className="md:hidden bg-blue-600 border-t border-blue-500">
+        <div className="md:hidden bg-blue-600/95 backdrop-blur-sm border-t border-blue-500 animate-slide-up">
           {navLinks.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               onClick={() => setIsOpen(false)}
               className={({ isActive }) =>
-                `block px-6 py-2 border-b border-blue-500 hover:bg-blue-500 ${
-                  isActive ? "bg-blue-500 font-semibold" : ""
+                `block px-6 py-3 border-b border-blue-500/50 hover:bg-white/10 transition-colors ${
+                  isActive ? "bg-white/20 font-semibold" : ""
                 }`
               }
             >
@@ -107,8 +116,9 @@ const AdminNavbar = () => {
               handleLogout();
               setIsOpen(false);
             }}
-            className="w-full text-left px-6 py-2 bg-red-500 hover:bg-red-600"
+            className="w-full text-left px-6 py-3 bg-red-500 hover:bg-red-600 transition-colors flex items-center gap-2"
           >
+            <i className="fas fa-sign-out-alt"></i>
             Logout
           </button>
         </div>
