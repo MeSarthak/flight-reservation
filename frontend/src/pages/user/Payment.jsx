@@ -69,7 +69,12 @@ const Payment = () => {
       setShowConfirmation(true);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Payment or booking failed");
+      const serverMessage = err.response?.data?.message;
+      if (serverMessage && serverMessage.toLowerCase().includes("seat")) {
+        setError("One or more selected seats are no longer available. Please go back and select different seats.");
+      } else {
+        setError(serverMessage || "Payment or booking failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
